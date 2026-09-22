@@ -31,3 +31,9 @@ next-env.d.ts
 *.pem
 .idea/
 .vscode/
+
+# FreeBuff
+.freebuff/
+
+# prisma generated client
+/src/generated
