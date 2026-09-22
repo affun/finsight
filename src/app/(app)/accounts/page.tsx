@@ -1,26 +1,18 @@
-"use client";
+import { CreditCard, Building2, TrendingUp, Wallet } from "lucide-react";
 
-import { CreditCard, Building2, TrendingUp, Wallet, Plus } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { accounts, transactions } from "@/lib/data/mockData";
-
-const balanceHistory = [
-  [12000, 11800, 12400, 12100, 12900, 12840],
-  [27000, 27500, 28000, 28200, 28400, 28500],
-  [-800, -1100, -900, -1300, -1200, -1240],
-  [78000, 80000, 81000, 83000, 84000, 84320],
-  [320, 340, 290, 350, 340, 340],
-];
+import { getAccountSummary, getAccounts } from "@/lib/data/queries";
+import { AddAccountButton, AccountActions } from "@/components/forms/AccountForm";
+import { AccountSparkline } from "./AccountSparkline";
 
 function accountIcon(type: string) {
   switch (type) {
-    case "checking":
+    case "BANK":
       return Building2;
-    case "savings":
+    case "CASH":
       return Wallet;
-    case "credit":
+    case "CREDIT_CARD":
       return CreditCard;
-    case "investment":
+    case "INVESTMENT":
       return TrendingUp;
     default:
       return Wallet;
@@ -29,19 +21,26 @@ function accountIcon(type: string) {
 
 function accountTypeLabel(type: string) {
   const m: Record<string, string> = {
-    checking: "Checking Account",
-    savings: "Savings Account",
-    credit: "Credit Card",
-    investment: "Brokerage",
-    cash: "Cash",
+    BANK: "Bank Account",
+    CASH: "Cash",
+    CREDIT_CARD: "Credit Card",
+    INVESTMENT: "Investment",
+    OTHER: "Other",
   };
   return m[type] || type;
 }
 
-export default function AccountsPage() {
-  const totalAssets = accounts.filter((a) => a.balance > 0).reduce((s, a) => s + a.balance, 0);
-  const totalLiabilities = accounts.filter((a) => a.balance < 0).reduce((s, a) => s + a.balance, 0);
-  const netWorth = totalAssets + totalLiabilities;
+/** Deterministic per-account accent + sparkline colors (palette preserved). */
+const CARD_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#6366F1", "#64748B", "#EC4899"];
+function cardColor(idx: number) {
+  return CARD_COLORS[idx % CARD_COLORS.length];
+}
+
+export default async function AccountsPage() {
+  const [accounts, summary] = await Promise.all([getAccounts(), getAccountSummary()]);
+
+  const fmt = (s: string) =>
+    Number(s).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }} className="responsive-padding">
@@ -63,31 +62,15 @@ export default function AccountsPage() {
             All your financial accounts in one place
           </p>
         </div>
-        <button
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "9px 16px",
-            borderRadius: 8,
-            background: "var(--primary)",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 13,
-            fontWeight: 600,
-            color: "white",
-          }}
-        >
-          <Plus size={14} /> Add Account
-        </button>
+        <AddAccountButton />
       </div>
 
       {/* Summary row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
         {[
-          { label: "Total Assets", value: `$${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, color: "var(--positive)" },
-          { label: "Total Liabilities", value: `-$${Math.abs(totalLiabilities).toLocaleString("en-US", { minimumFractionDigits: 2 })}`, color: "var(--negative)" },
-          { label: "Net Worth", value: `$${netWorth.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, color: "var(--primary)" },
+          { label: "Total Assets", value: `₹${fmt(summary.totalAssets)}`, color: "var(--positive)" },
+          { label: "Total Liabilities", value: `-₹${fmt(summary.totalLiabilities)}`, color: "var(--negative)" },
+          { label: "Net Worth", value: `₹${fmt(summary.netWorth)}`, color: "var(--primary)" },
         ].map((s) => (
           <div key={s.label} style={{ background: "var(--card)", borderRadius: 12, padding: "18px 20px", border: "1px solid var(--border)" }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>
@@ -104,9 +87,8 @@ export default function AccountsPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }} className="responsive-grid-2">
         {accounts.map((account, idx) => {
           const Icon = accountIcon(account.type);
-          const recentTxns = transactions.filter((t) => t.account === account.name).slice(0, 3);
-          const sparkData = balanceHistory[idx].map((v, i) => ({ v, i }));
-          const isNegative = account.balance < 0;
+          const color = cardColor(idx);
+          const isNegative = Number(account.balance) < 0;
 
           return (
             <div
@@ -122,7 +104,7 @@ export default function AccountsPage() {
               <div
                 style={{
                   padding: "20px 24px",
-                  background: `linear-gradient(135deg, ${account.color}20, ${account.color}08)`,
+                  background: `linear-gradient(135deg, ${color}20, ${color}08)`,
                   borderBottom: "1px solid var(--border)",
                   display: "flex",
                   justifyContent: "space-between",
@@ -136,18 +118,18 @@ export default function AccountsPage() {
                         width: 36,
                         height: 36,
                         borderRadius: 9,
-                        background: account.color + "25",
+                        background: color + "25",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon size={18} color={account.color} />
+                      <Icon size={18} color={color} />
                     </div>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)" }}>{account.name}</div>
                       <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-                        {accountTypeLabel(account.type)} {account.last4 ? `···· ${account.last4}` : ""}
+                        {accountTypeLabel(account.type)}
                       </div>
                     </div>
                   </div>
@@ -160,68 +142,49 @@ export default function AccountsPage() {
                       color: isNegative ? "var(--negative)" : "var(--foreground)",
                     }}
                   >
-                    {isNegative ? "-" : ""}${Math.abs(account.balance).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    {isNegative ? "-" : ""}₹{fmt(account.balance.replace("-", ""))}
                   </div>
                   <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 4 }}>
-                    {account.currency} · {account.institution}
+                    {account.currency} · {account.transactionCount} transaction{account.transactionCount === 1 ? "" : "s"}
                   </div>
                 </div>
-                <div style={{ width: 100, height: 50 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={sparkData} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
-                      <defs>
-                        <linearGradient id={`grad${idx}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={account.color} stopOpacity={0.4} />
-                          <stop offset="100%" stopColor={account.color} stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <Area type="monotone" dataKey="v" stroke={account.color} strokeWidth={2} fill={`url(#grad${idx})`} dot={false} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                <AccountSparkline color={color} seedValue={Number(account.balance)} />
               </div>
 
-              {/* Recent transactions */}
-              <div style={{ padding: "12px 0" }}>
-                <div style={{ padding: "0 20px 8px", fontSize: 11, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                  Recent
-                </div>
-                {recentTxns.length > 0 ? (
-                  recentTxns.map((t, i) => (
-                    <div
-                      key={t.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        padding: "8px 20px",
-                        borderTop: i === 0 ? "1px solid var(--border)" : "1px solid var(--border)",
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)" }}>{t.merchant}</div>
-                        <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>{t.date}</div>
-                      </div>
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono-data)",
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: t.type === "income" ? "var(--positive)" : "var(--foreground)",
-                        }}
-                      >
-                        {t.type === "income" ? "+" : ""}${Math.abs(t.amount).toFixed(2)}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ padding: "12px 20px", fontSize: 13, color: "var(--muted-foreground)" }}>No recent transactions</div>
-                )}
+              {/* Card footer — actions */}
+              <div
+                style={{
+                  padding: "12px 20px",
+                  borderTop: "1px solid var(--border)",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <AccountActions account={account} />
               </div>
             </div>
           );
         })}
       </div>
+
+      {accounts.length === 0 && (
+        <div
+          style={{
+            padding: "60px 24px",
+            background: "var(--card)",
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ fontSize: 16, fontWeight: 600, color: "var(--foreground)", marginBottom: 6 }}>
+            No accounts yet
+          </div>
+          <div style={{ fontSize: 14, color: "var(--muted-foreground)" }}>
+            Create your first account to start tracking transactions.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
