@@ -10,6 +10,7 @@ import {
   SlidersHorizontal,
   Grid3X3,
   List,
+  InboxIcon,
 } from "lucide-react";
 import { transactions } from "@/lib/data/mockData";
 
@@ -47,11 +48,14 @@ function categoryColor(cat: string) {
   return map[cat] || "#64748B";
 }
 
+type SortBy = "date" | "amount";
+type ViewMode = "categorized" | "raw";
+
 export default function TransactionsPage() {
-  const [view, setView] = useState<"categorized" | "raw">("categorized");
+  const [view, setView] = useState<ViewMode>("categorized");
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState("All");
-  const [sortBy, setSortBy] = useState<"date" | "amount">("date");
+  const [sortBy, setSortBy] = useState<SortBy>("date");
   const [showFilters, setShowFilters] = useState(false);
 
   const filtered = transactions
@@ -76,10 +80,34 @@ export default function TransactionsPage() {
 
   const total = filtered.reduce((sum, t) => sum + t.amount, 0);
 
+  const EmptyState = () => (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "60px 24px",
+        background: "var(--card)",
+        borderRadius: 14,
+        border: "1px solid var(--border)",
+        textAlign: "center",
+      }}
+    >
+      <InboxIcon size={40} color="var(--muted-foreground)" style={{ marginBottom: 16, opacity: 0.5 }} />
+      <div style={{ fontSize: 16, fontWeight: 600, color: "var(--foreground)", marginBottom: 6 }}>
+        No transactions found
+      </div>
+      <div style={{ fontSize: 14, color: "var(--muted-foreground)" }}>
+        Try adjusting your search or filters.
+      </div>
+    </div>
+  );
+
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }} className="responsive-padding">
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
         <div>
           <h1
             style={{
@@ -97,7 +125,7 @@ export default function TransactionsPage() {
             {filtered.length} transactions · Net {total >= 0 ? "+" : ""}${total.toFixed(2)}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button
             style={{
               display: "flex",
@@ -145,12 +173,14 @@ export default function TransactionsPage() {
               top: "50%",
               transform: "translateY(-50%)",
               color: "var(--muted-foreground)",
+              pointerEvents: "none",
             }}
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search transactions..."
+            aria-label="Search transactions"
             style={{
               width: "100%",
               padding: "9px 14px 9px 36px",
@@ -167,6 +197,8 @@ export default function TransactionsPage() {
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
+          aria-pressed={showFilters}
+          aria-label="Toggle category filters"
           style={{
             display: "flex",
             alignItems: "center",
@@ -184,7 +216,8 @@ export default function TransactionsPage() {
         </button>
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
+          onChange={(e) => setSortBy(e.target.value as SortBy)}
+          aria-label="Sort transactions"
           style={{
             padding: "9px 14px",
             borderRadius: 8,
@@ -201,9 +234,11 @@ export default function TransactionsPage() {
           <option value="amount">Sort: Amount</option>
         </select>
         {/* View toggle */}
-        <div style={{ display: "flex", background: "var(--secondary)", borderRadius: 8, padding: 3, gap: 2 }}>
+        <div style={{ display: "flex", background: "var(--secondary)", borderRadius: 8, padding: 3, gap: 2 }} role="group" aria-label="View mode">
           <button
             onClick={() => setView("categorized")}
+            aria-label="Categorized view"
+            aria-pressed={view === "categorized"}
             style={{
               padding: "5px 10px",
               borderRadius: 5,
@@ -218,6 +253,8 @@ export default function TransactionsPage() {
           </button>
           <button
             onClick={() => setView("raw")}
+            aria-label="List view"
+            aria-pressed={view === "raw"}
             style={{
               padding: "5px 10px",
               borderRadius: 5,
@@ -235,11 +272,12 @@ export default function TransactionsPage() {
 
       {/* Category filter chips */}
       {showFilters && (
-        <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }} role="group" aria-label="Category filters">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCat(cat)}
+              aria-pressed={selectedCat === cat}
               style={{
                 padding: "5px 12px",
                 borderRadius: 20,
@@ -257,7 +295,11 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {view === "categorized" ? (
+      {/* Empty state */}
+      {filtered.length === 0 && <EmptyState />}
+
+      {/* Categorized view */}
+      {filtered.length > 0 && view === "categorized" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {Object.entries(grouped).map(([cat, txns]) => {
             const catTotal = txns.reduce((sum, t) => sum + t.amount, 0);
@@ -349,9 +391,12 @@ export default function TransactionsPage() {
             );
           })}
         </div>
-      ) : (
-        <div style={{ background: "var(--card)", borderRadius: 14, border: "1px solid var(--border)", overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      )}
+
+      {/* Raw table view — wrapped for horizontal scroll on mobile */}
+      {filtered.length > 0 && view === "raw" && (
+        <div style={{ overflowX: "auto", borderRadius: 14, border: "1px solid var(--border)" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
             <thead>
               <tr style={{ background: "var(--secondary)", borderBottom: "1px solid var(--border)" }}>
                 {["Date", "Description", "Merchant", "Category", "Account", "Type", "Amount"].map((h) => (
@@ -375,7 +420,7 @@ export default function TransactionsPage() {
             </thead>
             <tbody>
               {filtered.map((t, i) => (
-                <tr key={t.id} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border)" }}>
+                <tr key={t.id} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border)", background: "var(--card)" }}>
                   <td style={{ padding: "11px 16px", fontFamily: "var(--font-mono-data)", fontSize: 12, color: "var(--muted-foreground)", whiteSpace: "nowrap" }}>
                     {t.date}
                   </td>
