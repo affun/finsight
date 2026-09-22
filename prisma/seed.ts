@@ -1,11 +1,10 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import { PrismaClient } from "../src/generated/prisma/client";
-import type { Prisma, TransactionType } from "../src/generated/prisma/client";
-
-// Deterministic seed data — same output on every run.
-faker.seed(20260923);
+import type { Prisma, TransactionType } from "../src/generated/prisma/client";  // Deterministic seed data — same output on every run.
+  faker.seed(20260923);
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? "" }),
@@ -125,6 +124,10 @@ function buildIncome(
 async function main() {
   console.log("🌱 Seeding FinSight database...");
 
+  // Password for the demo user is hashed with bcrypt (same algorithm as
+  // registration). Log in with: alex@finsight.dev / demo-password-123
+  const demoPasswordHash = await bcrypt.hash("demo-password-123", 12);
+
   // Idempotent: wipe existing demo data, respecting FK order.
   await prisma.dashboardWidget.deleteMany();
   await prisma.dashboardLayout.deleteMany();
@@ -137,7 +140,11 @@ async function main() {
 
   // ---------------------------------------------------------------- User
   const user = await prisma.user.create({
-    data: { name: "Alex Sharma", email: "alex@finsight.dev" },
+    data: {
+      name: "Alex Sharma",
+      email: "alex@finsight.dev",
+      passwordHash: demoPasswordHash,
+    },
   });
 
   // ------------------------------------------------------------- Accounts

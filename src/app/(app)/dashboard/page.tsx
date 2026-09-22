@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import type { TooltipProps } from "recharts";
 import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
+import { useUser } from "@/components/providers/UserProvider";
 import {
   TrendingUp,
   ArrowUpRight,
@@ -192,7 +193,17 @@ function WidgetRemoveButton({ onRemove, widgetName }: { onRemove: () => void; wi
   );
 }
 
+/** Time-of-day greeting used in the dashboard header. */
+function timeOfDayGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 18) return "afternoon";
+  return "evening";
+}
+
 export default function DashboardPage() {
+  const user = useUser();
+  const firstName = (user?.name ?? "there").split(/\s+/)[0] ?? "there";
   const router = useRouter();
   const [preset, setPreset] = useState("Overview");
   const [activeWidgets, setActiveWidgets] = useState<string[]>(DEFAULT_WIDGETS);
@@ -641,7 +652,7 @@ export default function DashboardPage() {
               margin: "0 0 4px",
             }}
           >
-            Good morning, Alex 👋
+            Good {timeOfDayGreeting()}, {firstName} 👋
           </h1>
           <p style={{ fontSize: 14, color: "var(--muted-foreground)", margin: 0 }}>
             Thursday, September 20, 2026 · Here&apos;s your financial overview

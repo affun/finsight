@@ -15,6 +15,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useUser } from "@/components/providers/UserProvider";
+import { getInitials } from "@/lib/initials";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -127,6 +129,10 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [currency, setCurrency] = useState("USD");
+  const user = useUser();
+  const displayName = user?.name ?? "Guest";
+  const displayEmail = user?.email ?? "Not signed in";
+  const initials = getInitials(displayName);
   const [notifications, setNotifications] = useState({
     budget: true,
     goals: true,
@@ -176,13 +182,13 @@ export default function SettingsPage() {
               flexShrink: 0,
             }}
           >
-            AJ
+            {initials}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: "var(--font-heading)", fontSize: 18, fontWeight: 700, color: "var(--foreground)" }}>
-              Alex Johnson
+              {displayName}
             </div>
-            <div style={{ fontSize: 13, color: "var(--muted-foreground)" }}>alex@example.com</div>
+            <div style={{ fontSize: 13, color: "var(--muted-foreground)" }}>{displayEmail}</div>
           </div>
           <button
             style={{
@@ -198,9 +204,10 @@ export default function SettingsPage() {
             Edit profile
           </button>
         </div>
-        <Row icon={User} label="Full name" desc="Alex Johnson">
+        <Row icon={User} label="Full name" desc={displayName}>
           <input
-            defaultValue="Alex Johnson"
+            defaultValue={displayName}
+            key={displayName}
             aria-label="Full name"
             style={{
               padding: "7px 12px",
@@ -215,9 +222,10 @@ export default function SettingsPage() {
             }}
           />
         </Row>
-        <Row icon={Globe} label="Email" desc="alex@example.com" isLast>
+        <Row icon={Globe} label="Email" desc={displayEmail} isLast>
           <input
-            defaultValue="alex@example.com"
+            defaultValue={displayEmail}
+            key={displayEmail}
             aria-label="Email address"
             style={{
               padding: "7px 12px",

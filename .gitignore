@@ -37,3 +37,5 @@ next-env.d.ts
 
 # prisma generated client
 /src/generated
+# embedded postgres data (scripts/dev-postgres.mjs)
+/pgdata/
