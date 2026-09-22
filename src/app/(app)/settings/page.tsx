@@ -12,6 +12,7 @@ import {
   Shield,
   User,
   Globe,
+  type LucideIcon,
 } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 
@@ -43,12 +44,14 @@ function Row({
   desc,
   children,
   danger,
+  isLast = false,
 }: {
-  icon: any;
+  icon: LucideIcon;
   label: string;
   desc?: string;
   children?: React.ReactNode;
   danger?: boolean;
+  isLast?: boolean;
 }) {
   return (
     <div
@@ -57,7 +60,7 @@ function Row({
         alignItems: "center",
         gap: 14,
         padding: "14px 20px",
-        borderBottom: "1px solid var(--border)",
+        borderBottom: isLast ? "none" : "1px solid var(--border)",
       }}
     >
       <div
@@ -85,10 +88,12 @@ function Row({
   );
 }
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label?: string }) {
   return (
     <button
       onClick={onChange}
+      aria-label={label || "Toggle setting"}
+      aria-pressed={checked}
       style={{
         width: 44,
         height: 24,
@@ -134,7 +139,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 800, margin: "0 auto" }}>
+    <div style={{ padding: "28px 32px", maxWidth: 800, margin: "0 auto" }} className="responsive-padding">
       <div style={{ marginBottom: 28 }}>
         <h1
           style={{
@@ -196,6 +201,7 @@ export default function SettingsPage() {
         <Row icon={User} label="Full name" desc="Alex Johnson">
           <input
             defaultValue="Alex Johnson"
+            aria-label="Full name"
             style={{
               padding: "7px 12px",
               borderRadius: 7,
@@ -209,24 +215,23 @@ export default function SettingsPage() {
             }}
           />
         </Row>
-        <div style={{ borderBottom: 0 }}>
-          <Row icon={Globe} label="Email" desc="alex@example.com">
-            <input
-              defaultValue="alex@example.com"
-              style={{
-                padding: "7px 12px",
-                borderRadius: 7,
-                border: "1px solid var(--border)",
-                background: "var(--secondary)",
-                color: "var(--foreground)",
-                fontSize: 13,
-                fontFamily: "var(--font-body)",
-                outline: "none",
-                width: 200,
-              }}
-            />
-          </Row>
-        </div>
+        <Row icon={Globe} label="Email" desc="alex@example.com" isLast>
+          <input
+            defaultValue="alex@example.com"
+            aria-label="Email address"
+            style={{
+              padding: "7px 12px",
+              borderRadius: 7,
+              border: "1px solid var(--border)",
+              background: "var(--secondary)",
+              color: "var(--foreground)",
+              fontSize: 13,
+              fontFamily: "var(--font-body)",
+              outline: "none",
+              width: 200,
+            }}
+          />
+        </Row>
       </Section>
 
       {/* Appearance */}
@@ -240,6 +245,7 @@ export default function SettingsPage() {
                 <button
                   key={t}
                   onClick={() => setTheme(t)}
+                  aria-pressed={theme === t}
                   style={{
                     flex: 1,
                     padding: "12px",
@@ -269,10 +275,11 @@ export default function SettingsPage() {
             })}
           </div>
         </div>
-        <Row icon={Globe} label="Currency" desc="Primary display currency">
+        <Row icon={Globe} label="Currency" desc="Primary display currency" isLast>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
+            aria-label="Currency"
             style={{
               padding: "7px 12px",
               borderRadius: 7,
@@ -302,9 +309,9 @@ export default function SettingsPage() {
             { key: "weekly", label: "Weekly summary", desc: "Receive a weekly digest of your finances" },
             { key: "anomaly", label: "Spending anomalies", desc: "AI alerts for unusual spending patterns" },
           ] as const
-        ).map((item) => (
-          <Row key={item.key} icon={Bell} label={item.label} desc={item.desc}>
-            <Toggle checked={notifications[item.key]} onChange={() => toggleNotification(item.key)} />
+        ).map((item, idx, arr) => (
+          <Row key={item.key} icon={Bell} label={item.label} desc={item.desc} isLast={idx === arr.length - 1}>
+            <Toggle checked={notifications[item.key]} onChange={() => toggleNotification(item.key)} label={item.label} />
           </Row>
         ))}
       </Section>
@@ -341,12 +348,12 @@ export default function SettingsPage() {
             Import
           </button>
         </Row>
-        <Row icon={Shield} label="Security" desc="Two-factor authentication is enabled" />
+        <Row icon={Shield} label="Security" desc="Two-factor authentication is enabled" isLast />
       </Section>
 
       {/* Danger zone */}
       <Section title="Danger Zone">
-        <Row icon={Trash2} label="Delete account" desc="Permanently delete your FinSight account and all data" danger>
+        <Row icon={Trash2} label="Delete account" desc="Permanently delete your FinSight account and all data" danger isLast>
           <button
             style={{
               padding: "7px 14px",

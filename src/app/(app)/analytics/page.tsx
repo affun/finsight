@@ -19,6 +19,8 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
+import type { TooltipProps } from "recharts";
+import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 import { Brain, TrendingUp, TrendingDown, Zap } from "lucide-react";
 import {
   cashFlowData,
@@ -27,13 +29,13 @@ import {
   netWorthHistory,
 } from "@/lib/data/mockData";
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>
       <div style={{ color: "var(--muted-foreground)", marginBottom: 4 }}>{label}</div>
-      {payload.map((p: any) => (
-        <div key={p.name} style={{ color: p.color || p.stroke, fontWeight: 600 }}>
+      {payload.map((p) => (
+        <div key={p.name as string} style={{ color: p.color || (p.stroke as string), fontWeight: 600 }}>
           {p.name}: {typeof p.value === "number" ? `$${p.value.toLocaleString()}` : p.value}
         </div>
       ))}
@@ -82,8 +84,8 @@ export default function AnalyticsPage() {
   const router = useRouter();
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }} className="responsive-padding">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
         <div>
           <h1
             style={{
@@ -122,7 +124,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }} className="responsive-grid-4">
         {[
           { label: "Avg Monthly Spend", value: "$6,373", sub: "Last 6 months", icon: TrendingDown, color: "var(--negative)" },
           { label: "Avg Monthly Income", value: "$10,853", sub: "Last 6 months", icon: TrendingUp, color: "var(--positive)" },
@@ -148,7 +150,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Charts grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }} className="responsive-grid-2">
         <ChartCard title="Cash Flow — Income vs Expenses" action={<span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>6 months</span>}>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={cashFlowData} barGap={4}>
@@ -188,7 +190,7 @@ export default function AnalyticsPage() {
         </ChartCard>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }} className="responsive-grid-2">
         <ChartCard title="Net Worth Trend">
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={netWorthHistory}>
@@ -220,7 +222,7 @@ export default function AnalyticsPage() {
         </ChartCard>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }} className="responsive-grid-2">
         <ChartCard title="Category Spending Comparison">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={categoryComparison} barGap={2}>

@@ -12,6 +12,7 @@ interface AuthProps {
 }
 
 function Input({
+  id,
   label,
   type,
   value,
@@ -19,6 +20,7 @@ function Input({
   placeholder,
   error,
 }: {
+  id: string;
   label: string;
   type: string;
   value: string;
@@ -31,13 +33,15 @@ function Input({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{label}</label>
+      <label htmlFor={id} style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{label}</label>
       <div style={{ position: "relative" }}>
         <input
+          id={id}
           type={isPassword && show ? "text" : type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          autoComplete={isPassword ? (id === "confirm" ? "new-password" : "current-password") : id === "email" ? "email" : "name"}
           style={{
             width: "100%",
             padding: "10px 14px",
@@ -51,11 +55,14 @@ function Input({
             boxSizing: "border-box",
             fontFamily: "var(--font-body)",
           }}
+          aria-invalid={error ? "true" : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShow(!show)}
+            aria-label={show ? "Hide password" : "Show password"}
             style={{
               position: "absolute",
               right: 12,
@@ -73,7 +80,7 @@ function Input({
           </button>
         )}
       </div>
-      {error && <div style={{ fontSize: 12, color: "var(--negative)" }}>{error}</div>}
+      {error && <div id={`${id}-error`} role="alert" style={{ fontSize: 12, color: "var(--negative)" }}>{error}</div>}
     </div>
   );
 }
@@ -177,17 +184,17 @@ export default function Auth({ mode }: AuthProps) {
           {isLogin ? "Welcome back" : "Create your account"}
         </h1>
         <p style={{ fontSize: 14, color: "var(--muted-foreground)", textAlign: "center", margin: "0 0 28px" }}>
-          {isLogin ? "Sign in to your FinSight account" : "Start your 30-day free trial"}
+          {isLogin ? "Sign in to your FinSight account" : "Create your free demo account"}
         </p>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }} noValidate>
           {!isLogin && (
-            <Input label="Full name" type="text" value={name} onChange={setName} placeholder="Alex Johnson" error={errors.name} />
+            <Input id="name" label="Full name" type="text" value={name} onChange={setName} placeholder="Alex Johnson" error={errors.name} />
           )}
-          <Input label="Email" type="email" value={email} onChange={setEmail} placeholder="alex@example.com" error={errors.email} />
-          <Input label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" error={errors.password} />
+          <Input id="email" label="Email" type="email" value={email} onChange={setEmail} placeholder="alex@example.com" error={errors.email} />
+          <Input id="password" label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" error={errors.password} />
           {!isLogin && (
-            <Input label="Confirm password" type="password" value={confirm} onChange={setConfirm} placeholder="••••••••" error={errors.confirm} />
+            <Input id="confirm" label="Confirm password" type="password" value={confirm} onChange={setConfirm} placeholder="••••••••" error={errors.confirm} />
           )}
           {isLogin && (
             <div style={{ textAlign: "right", marginTop: -8 }}>

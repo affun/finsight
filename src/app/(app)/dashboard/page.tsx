@@ -14,6 +14,8 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
+import type { TooltipProps } from "recharts";
+import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 import {
   TrendingUp,
   ArrowUpRight,
@@ -135,7 +137,7 @@ function StatCard({
   );
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -148,16 +150,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       }}
     >
       <div style={{ color: "var(--muted-foreground)", marginBottom: 4 }}>{label}</div>
-      {payload.map((p: any) => (
-        <div key={p.name} style={{ color: p.color, fontWeight: 600 }}>
-          {p.name}: ${p.value.toLocaleString()}
+      {payload.map((p) => (
+        <div key={p.name as string} style={{ color: p.color, fontWeight: 600 }}>
+          {p.name}: ${(p.value as number).toLocaleString()}
         </div>
       ))}
     </div>
   );
 };
 
-function WidgetDragHandle({ onRemove }: { onRemove: () => void }) {
+function WidgetRemoveButton({ onRemove, widgetName }: { onRemove: () => void; widgetName: string }) {
   return (
     <div
       style={{
@@ -171,6 +173,7 @@ function WidgetDragHandle({ onRemove }: { onRemove: () => void }) {
     >
       <button
         onClick={onRemove}
+        aria-label={`Remove ${widgetName} widget`}
         style={{
           width: 22,
           height: 22,
@@ -229,7 +232,7 @@ export default function DashboardPage() {
       case "Net Worth":
         return (
           <div style={{ ...cardBase, gridColumn: "span 2", padding: "20px 22px" }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             <div
               style={{
                 fontSize: 11,
@@ -252,7 +255,7 @@ export default function DashboardPage() {
                 marginBottom: 6,
               }}
             >
-              $124,760.62
+              ${netWorthHistory[netWorthHistory.length - 1].netWorth.toLocaleString()}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
               <TrendingUp size={14} color="var(--positive)" />
@@ -278,21 +281,22 @@ export default function DashboardPage() {
       case "Income":
         return (
           <div style={cardBase}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             <StatCard label="Income" value="$12,720" sub="+12% vs last month" trend="up" color="var(--positive)" />
           </div>
         );
       case "Expenses":
         return (
           <div style={cardBase}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
-            <StatCard label="Expenses" value="$6,334" sub="-3% vs last month" trend="up" />
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
+            {/* Expenses decreased by 3% — trend="down" means down arrow, indicating reduction */}
+            <StatCard label="Expenses" value="$6,334" sub="-3% vs last month" trend="down" />
           </div>
         );
       case "Savings Rate":
         return (
           <div style={cardBase}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             <StatCard label="Savings Rate" value="50.2%" sub="+2.1pp vs last month" trend="up" color="var(--primary)" />
           </div>
         );
@@ -300,7 +304,7 @@ export default function DashboardPage() {
       case "Cash Flow":
         return (
           <div style={{ ...cardBase, gridColumn: "span 2" }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header("Cash Flow", <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>Last 6 months</span>)}
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={cashFlowData} margin={{ top: 0, right: 20, bottom: 0, left: 20 }} barGap={4}>
@@ -316,7 +320,7 @@ export default function DashboardPage() {
       case "Spending Breakdown":
         return (
           <div style={{ ...cardBase }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header("Spending")}
             <div style={{ padding: "0 20px 20px", display: "flex", gap: 16, alignItems: "center" }}>
               <ResponsiveContainer width={100} height={100}>
@@ -346,7 +350,7 @@ export default function DashboardPage() {
       case "Budget Progress":
         return (
           <div style={{ ...cardBase }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header(
               "Budgets",
               <button
@@ -361,6 +365,7 @@ export default function DashboardPage() {
                   alignItems: "center",
                   gap: 2,
                 }}
+                aria-label="View all budgets"
               >
                 View all <ChevronRight size={12} />
               </button>
@@ -406,7 +411,7 @@ export default function DashboardPage() {
       case "Recent Transactions":
         return (
           <div style={{ ...cardBase, gridColumn: "span 2" }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header(
               "Recent Transactions",
               <button
@@ -421,6 +426,7 @@ export default function DashboardPage() {
                   alignItems: "center",
                   gap: 2,
                 }}
+                aria-label="View all transactions"
               >
                 View all <ChevronRight size={12} />
               </button>
@@ -480,7 +486,7 @@ export default function DashboardPage() {
       case "Financial Goals":
         return (
           <div style={{ ...cardBase, gridColumn: "span 2" }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header(
               "Goals",
               <button
@@ -495,11 +501,13 @@ export default function DashboardPage() {
                   alignItems: "center",
                   gap: 2,
                 }}
+                aria-label="View all goals"
               >
                 View all <ChevronRight size={12} />
               </button>
             )}
-            <div style={{ padding: "0 20px 20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div style={{ padding: "0 20px 20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}
+              className="responsive-grid-3">
               {goals.slice(0, 3).map((g) => {
                 const pct = (g.current / g.target) * 100;
                 return (
@@ -545,7 +553,7 @@ export default function DashboardPage() {
       case "AI Insights":
         return (
           <div style={{ ...cardBase, background: "linear-gradient(135deg, #6366F108, #8B5CF608)", gridColumn: "span 2" }}>
-            {customizing && <WidgetDragHandle onRemove={() => removeWidget(name)} />}
+            {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             <div style={{ padding: "18px 20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                 <div
@@ -564,7 +572,7 @@ export default function DashboardPage() {
                 <span style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>AI Insights</span>
                 <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: "auto" }}>Updated now</span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }} className="responsive-grid-2">
                 {[
                   { icon: "⚠️", text: "Shopping is $119 over budget this month", type: "warning" },
                   { icon: "🎯", text: "On track to hit Japan trip goal by June 2027", type: "positive" },
@@ -619,9 +627,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }} className="responsive-padding">
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
         <div>
           <h1
             style={{
@@ -636,10 +644,10 @@ export default function DashboardPage() {
             Good morning, Alex 👋
           </h1>
           <p style={{ fontSize: 14, color: "var(--muted-foreground)", margin: 0 }}>
-            Thursday, September 20, 2026 · Here's your financial overview
+            Thursday, September 20, 2026 · Here&apos;s your financial overview
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           {/* Presets */}
           <div style={{ display: "flex", background: "var(--secondary)", borderRadius: 9, padding: 3, gap: 2 }}>
             {PRESETS.map((p) => (
@@ -656,6 +664,7 @@ export default function DashboardPage() {
                   cursor: "pointer",
                   color: preset === p ? "var(--foreground)" : "var(--muted-foreground)",
                 }}
+                aria-pressed={preset === p}
               >
                 {p}
               </button>
@@ -676,6 +685,7 @@ export default function DashboardPage() {
               fontWeight: 500,
               color: customizing ? "white" : "var(--foreground)",
             }}
+            aria-pressed={customizing}
           >
             <LayoutDashboard size={14} />
             {customizing ? "Done" : "Customize"}
@@ -717,6 +727,7 @@ export default function DashboardPage() {
                 cursor: "pointer",
                 color: "var(--foreground)",
               }}
+              aria-label={`Add ${w} widget`}
             >
               <Plus size={11} /> {w}
             </button>
@@ -728,7 +739,10 @@ export default function DashboardPage() {
       )}
 
       {/* Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+      <div
+        style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}
+        className="responsive-grid-4"
+      >
         {activeWidgets.map((w) => (
           <div key={w} style={{ display: "contents" }}>
             {renderWidget(w)}

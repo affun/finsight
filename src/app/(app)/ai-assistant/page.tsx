@@ -80,7 +80,9 @@ export default function AIAssistantPage() {
           alignItems: "center",
           gap: 12,
           flexShrink: 0,
+          flexWrap: "wrap",
         }}
+        className="responsive-padding"
       >
         <div
           style={{
@@ -104,7 +106,7 @@ export default function AIAssistantPage() {
             Online · Analyzing your September 2026 data
           </div>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }} className="responsive-hide-mobile">
           {[
             { icon: DollarSign, label: "$12,720 income" },
             { icon: ArrowUpRight, label: "50.2% savings" },
@@ -132,7 +134,7 @@ export default function AIAssistantPage() {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px", display: "flex", flexDirection: "column", gap: 20 }} className="responsive-padding">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -160,7 +162,7 @@ export default function AIAssistantPage() {
                 <Sparkles size={15} color="white" />
               </div>
             )}
-            <div style={{ maxWidth: "70%" }}>
+            <div style={{ maxWidth: "85%" }}>
               <div
                 style={{
                   padding: "12px 16px",
@@ -252,7 +254,7 @@ export default function AIAssistantPage() {
 
       {/* Suggested questions */}
       {messages.length < 3 && (
-        <div style={{ padding: "0 32px 12px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ padding: "0 32px 12px", display: "flex", gap: 8, flexWrap: "wrap" }} className="responsive-padding">
           {suggestedQuestions.slice(0, 4).map((q) => (
             <button
               key={q}
@@ -284,6 +286,7 @@ export default function AIAssistantPage() {
           background: "var(--card)",
           flexShrink: 0,
         }}
+        className="responsive-padding"
       >
         <div
           style={{
@@ -307,6 +310,7 @@ export default function AIAssistantPage() {
               }
             }}
             placeholder="Ask anything about your finances..."
+            aria-label="Ask FinSight AI a question"
             rows={1}
             style={{
               flex: 1,
@@ -325,6 +329,7 @@ export default function AIAssistantPage() {
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
+            aria-label="Send message"
             style={{
               width: 32,
               height: 32,

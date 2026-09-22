@@ -44,8 +44,8 @@ export default function AccountsPage() {
   const netWorth = totalAssets + totalLiabilities;
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }} className="responsive-padding">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
         <div>
           <h1
             style={{
@@ -101,7 +101,7 @@ export default function AccountsPage() {
       </div>
 
       {/* Account cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }} className="responsive-grid-2">
         {accounts.map((account, idx) => {
           const Icon = accountIcon(account.type);
           const recentTxns = transactions.filter((t) => t.account === account.name).slice(0, 3);

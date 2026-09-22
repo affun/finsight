@@ -89,7 +89,7 @@ export default function Sidebar() {
             color: "var(--foreground)",
             padding: 4,
           }}
-          aria-label="Toggle Navigation Menu"
+          aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -107,11 +107,13 @@ export default function Sidebar() {
             zIndex: 45,
             backdropFilter: "blur(4px)",
           }}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar Navigation */}
       <aside
+        className={`lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} max-lg:fixed max-lg:top-0 max-lg:left-0 max-lg:transition-transform max-lg:duration-[250ms] max-lg:ease-in-out`}
         style={{
           width: 260,
           height: "100vh",
@@ -123,10 +125,8 @@ export default function Sidebar() {
           left: 0,
           top: 0,
           zIndex: 50,
-          transform: mobileOpen ? "translateX(0)" : undefined,
-          transition: "transform 0.25s ease-in-out",
         }}
-        className={`max-lg:${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        aria-label="Main navigation"
       >
         {/* Header / Logo */}
         <div
@@ -213,7 +213,7 @@ export default function Sidebar() {
 
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href === "/ai-assistant" && pathname === "/ai");
+            const isActive = pathname === item.href;
 
             return (
               <Link
@@ -242,6 +242,7 @@ export default function Sidebar() {
                   border: isActive ? "1px solid var(--border)" : "1px solid transparent",
                   transition: "all 0.15s ease",
                 }}
+                aria-current={isActive ? "page" : undefined}
               >
                 <div
                   style={{
@@ -304,6 +305,7 @@ export default function Sidebar() {
               fontWeight: 500,
               width: "100%",
             }}
+            aria-label={`Switch to ${activeTheme === "dark" ? "light" : "dark"} mode`}
           >
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
               {activeTheme === "dark" ? <Moon size={16} color="#6366F1" /> : <Sun size={16} color="#F59E0B" />}
@@ -346,6 +348,7 @@ export default function Sidebar() {
                 color: "white",
                 flexShrink: 0,
               }}
+              aria-label="User avatar: Alex Johnson"
             >
               AJ
             </div>
@@ -383,6 +386,7 @@ export default function Sidebar() {
                 padding: 4,
               }}
               title="Sign Out"
+              aria-label="Sign out"
             >
               <LogOut size={16} />
             </Link>

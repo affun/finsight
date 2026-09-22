@@ -72,3 +72,48 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
+
+/* Keyboard focus styles — accessible without affecting mouse users */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive grid helpers used by inline-styled pages */
+@media (max-width: 768px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .responsive-grid-3 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+  .responsive-grid-2 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+  .responsive-hero {
+    grid-template-columns: 1fr !important;
+  }
+  .responsive-stats-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .responsive-features-3 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+  .responsive-hide-mobile {
+    display: none !important;
+  }
+  .responsive-padding {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+  .responsive-stats-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}

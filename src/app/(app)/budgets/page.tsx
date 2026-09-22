@@ -1,21 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, AlertTriangle, Brain } from "lucide-react";
 import { budgets } from "@/lib/data/mockData";
 
 export default function BudgetsPage() {
   const router = useRouter();
-  const [showCreate, setShowCreate] = useState(false);
   const totalBudgeted = budgets.reduce((s, b) => s + b.budgeted, 0);
   const totalSpent = budgets.reduce((s, b) => s + b.spent, 0);
   const remaining = totalBudgeted - totalSpent;
   const overBudget = budgets.filter((b) => b.spent > b.budgeted);
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }} className="responsive-padding">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
         <div>
           <h1
             style={{
@@ -50,7 +48,6 @@ export default function BudgetsPage() {
             <Brain size={14} color="#8B5CF6" /> Ask FinSight
           </button>
           <button
-            onClick={() => setShowCreate(true)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -71,7 +68,7 @@ export default function BudgetsPage() {
       </div>
 
       {/* Summary */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }} className="responsive-grid-3">
         {[
           { label: "Total Budget", value: `$${totalBudgeted.toLocaleString()}`, color: "var(--foreground)" },
           { label: "Total Spent", value: `$${totalSpent.toLocaleString()}`, color: totalSpent > totalBudgeted ? "var(--negative)" : "var(--foreground)" },
@@ -125,6 +122,7 @@ export default function BudgetsPage() {
             gap: 10,
             alignItems: "flex-start",
           }}
+          role="alert"
         >
           <AlertTriangle size={16} color="var(--negative)" style={{ marginTop: 1, flexShrink: 0 }} />
           <div>
@@ -139,7 +137,7 @@ export default function BudgetsPage() {
       )}
 
       {/* Budget categories */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }} className="responsive-grid-2">
         {budgets.map((b) => {
           const pct = Math.min(100, (b.spent / b.budgeted) * 100);
           const over = b.spent > b.budgeted;
