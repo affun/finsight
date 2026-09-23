@@ -31,3 +31,11 @@ next-env.d.ts
 *.pem
 .idea/
 .vscode/
+
+# FreeBuff
+.freebuff/
+
+# prisma generated client
+/src/generated
+# embedded postgres data (scripts/dev-postgres.mjs)
+/pgdata/

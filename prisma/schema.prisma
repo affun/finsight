@@ -1,0 +1,193 @@
+// FinSight — Phase 2A: Database Foundation
+// PostgreSQL + Prisma ORM
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum AccountType {
+  BANK
+  CASH
+  CREDIT_CARD
+  INVESTMENT
+  OTHER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+// ---------------------------------------------------------------------------
+// Auth.js support tables (Phase 2B)
+// Sessions are JWT-encoded for credential logins; these tables follow the
+// Auth.js schema so the Prisma adapter can manage users/sessions if session
+// storage changes later (e.g. adding OAuth providers).
+// ---------------------------------------------------------------------------
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  // Credential auth (Phase 2B): bcrypt hash of the user's password.
+  // Nullable so future OAuth-only users remain valid.
+  passwordHash String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts         Account[]
+  budgets          Budget[]
+  goals            Goal[]
+  dashboardLayouts DashboardLayout[]
+  sessions         Session[]
+}
+
+model Account {
+  id        String      @id @default(cuid())
+  userId    String
+  name      String
+  type      AccountType
+  balance   Decimal     @db.Decimal(14, 2)
+  currency  String      @default("INR")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([type])
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  accountId   String
+  amount      Decimal         @db.Decimal(14, 2)
+  type        TransactionType
+  merchant    String
+  category    String
+  description String?
+  date        DateTime
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, date])
+  @@index([accountId, type])
+  @@index([accountId, category])
+}
+
+model Budget {
+  id        String       @id @default(cuid())
+  userId    String
+  name      String
+  amount    Decimal      @db.Decimal(14, 2)
+  period    BudgetPeriod @default(MONTHLY)
+  startDate DateTime
+  endDate   DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories BudgetCategory[]
+
+  @@index([userId])
+}
+
+model BudgetCategory {
+  id              String  @id @default(cuid())
+  budgetId        String
+  category        String
+  allocatedAmount Decimal @db.Decimal(14, 2)
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetId, category])
+}
+
+model Goal {
+  id            String    @id @default(cuid())
+  userId        String
+  name          String
+  targetAmount  Decimal   @db.Decimal(14, 2)
+  currentAmount Decimal   @default(0) @db.Decimal(14, 2)
+  targetDate    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DashboardLayout {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  widgets DashboardWidget[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model DashboardWidget {
+  id        String  @id @default(cuid())
+  layoutId  String
+  widgetId  String // identifier of the bento widget in the UI
+  x         Int     @default(0) // grid column position
+  y         Int     @default(0) // grid row position
+  width     Int     @default(4) // grid column span
+  height    Int     @default(2) // grid row span
+  visible   Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  layout DashboardLayout @relation(fields: [layoutId], references: [id], onDelete: Cascade)
+
+  @@unique([layoutId, widgetId])
+  @@index([layoutId, sortOrder])
+}

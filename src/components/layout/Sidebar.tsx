@@ -19,6 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useUser } from "@/components/providers/UserProvider";
+import { getInitials } from "@/lib/initials";
+import { logoutAction } from "@/lib/actions/auth";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -35,6 +38,9 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { activeTheme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const user = useUser();
+  const displayName = user?.name ?? "Guest";
+  const initials = getInitials(displayName);
 
   return (
     <>
@@ -348,9 +354,9 @@ export default function Sidebar() {
                 color: "white",
                 flexShrink: 0,
               }}
-              aria-label="User avatar: Alex Johnson"
+              aria-label={`User avatar: ${displayName}`}
             >
-              AJ
+              {initials}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
@@ -363,7 +369,7 @@ export default function Sidebar() {
                   textOverflow: "ellipsis",
                 }}
               >
-                Alex Johnson
+                {displayName}
               </div>
               <div
                 style={{
@@ -374,22 +380,27 @@ export default function Sidebar() {
                   textOverflow: "ellipsis",
                 }}
               >
-                alex@example.com
+                {user?.email ?? "Not signed in"}
               </div>
             </div>
-            <Link
-              href="/login"
-              style={{
-                color: "var(--muted-foreground)",
-                display: "flex",
-                alignItems: "center",
-                padding: 4,
-              }}
-              title="Sign Out"
-              aria-label="Sign out"
-            >
-              <LogOut size={16} />
-            </Link>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                style={{
+                  color: "var(--muted-foreground)",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 4,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+                title="Sign Out"
+                aria-label="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
+            </form>
           </div>
         </div>
       </aside>

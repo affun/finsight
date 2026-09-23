@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useActionState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, PieChart } from "lucide-react";
+import { Eye, EyeOff, PieChart, Loader2 } from "lucide-react";
+
+import { loginAction, registerAction, type AuthFormState } from "@/lib/actions/auth";
 
 type AuthMode = "login" | "register";
 
@@ -13,6 +14,7 @@ interface AuthProps {
 
 function Input({
   id,
+  name,
   label,
   type,
   value,
@@ -21,6 +23,7 @@ function Input({
   error,
 }: {
   id: string;
+  name: string;
   label: string;
   type: string;
   value: string;
@@ -37,6 +40,7 @@ function Input({
       <div style={{ position: "relative" }}>
         <input
           id={id}
+          name={name}
           type={isPassword && show ? "text" : type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -86,29 +90,14 @@ function Input({
 }
 
 export default function Auth({ mode }: AuthProps) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const isLogin = mode === "login";
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errs: Record<string, string> = {};
-    if (!email) errs.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) errs.email = "Enter a valid email";
-    if (!password) errs.password = "Password is required";
-    else if (password.length < 8) errs.password = "Password must be at least 8 characters";
-    if (!isLogin && password !== confirm) errs.confirm = "Passwords do not match";
-    if (!isLogin && !name) errs.name = "Name is required";
-
-    setErrors(errs);
-    if (Object.keys(errs).length === 0) {
-      router.push("/dashboard");
-    }
-  };
+  const action = isLogin ? loginAction : registerAction;
+  const [state, formAction, isPending] = React.useActionState<AuthFormState, FormData>(action, {});
 
   return (
     <div
@@ -187,14 +176,14 @@ export default function Auth({ mode }: AuthProps) {
           {isLogin ? "Sign in to your FinSight account" : "Create your free demo account"}
         </p>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }} noValidate>
+        <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 16 }} noValidate>
           {!isLogin && (
-            <Input id="name" label="Full name" type="text" value={name} onChange={setName} placeholder="Alex Johnson" error={errors.name} />
+            <Input id="name" name="name" label="Full name" type="text" value={name} onChange={setName} placeholder="Alex Johnson" error={state.fieldErrors?.name} />
           )}
-          <Input id="email" label="Email" type="email" value={email} onChange={setEmail} placeholder="alex@example.com" error={errors.email} />
-          <Input id="password" label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" error={errors.password} />
+          <Input id="email" name="email" label="Email" type="email" value={email} onChange={setEmail} placeholder="alex@example.com" error={state.fieldErrors?.email} />
+          <Input id="password" name="password" label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" error={state.fieldErrors?.password} />
           {!isLogin && (
-            <Input id="confirm" label="Confirm password" type="password" value={confirm} onChange={setConfirm} placeholder="••••••••" error={errors.confirm} />
+            <Input id="confirm" name="confirmPassword" label="Confirm password" type="password" value={confirm} onChange={setConfirm} placeholder="••••••••" error={state.fieldErrors?.confirmPassword} />
           )}
           {isLogin && (
             <div style={{ textAlign: "right", marginTop: -8 }}>
@@ -214,23 +203,46 @@ export default function Auth({ mode }: AuthProps) {
               </button>
             </div>
           )}
+          {state.error && (
+            <div
+              role="alert"
+              style={{
+                fontSize: 13,
+                color: "var(--negative)",
+                background: "color-mix(in srgb, var(--negative) 8%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--negative) 35%, transparent)",
+                borderRadius: 8,
+                padding: "10px 12px",
+                textAlign: "center",
+              }}
+            >
+              {state.error}
+            </div>
+          )}
           <button
             type="submit"
+            disabled={isPending}
             style={{
               width: "100%",
               padding: "12px 0",
               borderRadius: 9,
               background: "var(--primary)",
               border: "none",
-              cursor: "pointer",
+              cursor: isPending ? "wait" : "pointer",
               fontSize: 15,
               fontWeight: 600,
               color: "white",
               marginTop: 4,
               boxShadow: "0 4px 16px #6366F140",
+              opacity: isPending ? 0.7 : 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
             }}
           >
-            {isLogin ? "Sign in" : "Create account"}
+            {isPending && <Loader2 size={16} className="animate-spin" />}
+            {isPending ? (isLogin ? "Signing in…" : "Creating account…") : isLogin ? "Sign in" : "Create account"}
           </button>
         </form>
 
@@ -248,21 +260,6 @@ export default function Auth({ mode }: AuthProps) {
             {isLogin ? "Sign up" : "Sign in"}
           </Link>
         </div>
-
-        {isLogin && (
-          <div style={{ borderTop: "1px solid var(--border)", marginTop: 24, paddingTop: 20, textAlign: "center" }}>
-            <Link
-              href="/dashboard"
-              style={{
-                fontSize: 13,
-                color: "var(--muted-foreground)",
-                textDecoration: "none",
-              }}
-            >
-              View demo without signing in →
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );
