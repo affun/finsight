@@ -2,16 +2,21 @@
  * Spins up a local embedded PostgreSQL for development — no Docker or
  * system install required. Data lives in ./pgdata (gitignored).
  *
+ * Safe to run repeatedly: if ./pgdata already contains an initialized
+ * cluster it is reused instead of re-running initdb.
+ *
  * Usage: node scripts/dev-postgres.mjs
  * Stop with Ctrl+C (shuts the database down cleanly).
  */
+import { existsSync } from "node:fs";
 import EmbeddedPostgres from "embedded-postgres";
 
 const PORT = Number(process.env.PGPORT ?? 5432);
 const DB_NAME = "finsight";
+const DATA_DIR = "./pgdata";
 
 const pg = new EmbeddedPostgres({
-  databaseDir: "./pgdata",
+  databaseDir: DATA_DIR,
   user: "postgres",
   password: "postgres",
   port: PORT,
@@ -19,7 +24,12 @@ const pg = new EmbeddedPostgres({
 });
 
 async function main() {
-  await pg.initialise();
+  // initdb refuses to run on a non-empty directory — only initialize once.
+  if (existsSync(`${DATA_DIR}/PG_VERSION`)) {
+    console.log("[dev-postgres] reusing existing cluster in ./pgdata");
+  } else {
+    await pg.initialise();
+  }
   await pg.start();
   try {
     await pg.createDatabase(DB_NAME);

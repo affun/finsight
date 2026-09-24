@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AreaChart,
@@ -187,12 +187,41 @@ function WidgetRemoveButton({ onRemove, widgetName }: { onRemove: () => void; wi
   );
 }
 
-/** Time-of-day greeting used in the dashboard header. */
-function timeOfDayGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 18) return "afternoon";
-  return "evening";
+/**
+ * Time-of-day greeting used in the dashboard header.
+ *
+ * Computed with `useEffect`/`useState` so the server render and the first
+ * client render agree ("Good day") — calling `new Date()` during render
+ * would produce a hydration mismatch whenever the clock crossed AM/PM or
+ * the server and browser sat in different timezones.
+ */
+function useTimeOfDayGreeting(): string {
+  const [greeting, setGreeting] = useState("day");
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? "morning" : h < 18 ? "afternoon" : "evening");
+  }, []);
+
+  return greeting;
+}
+
+/** Today's date label, set after mount (locale-safe between SSR and client). */
+function useTodayLabel(): string {
+  const [label, setLabel] = useState("");
+
+  useEffect(() => {
+    setLabel(
+      new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    );
+  }, []);
+
+  return label;
 }
 
 export function DashboardView({
@@ -207,6 +236,8 @@ export function DashboardView({
   const user = useUser();
   const firstName = (user?.name ?? "there").split(/\s+/)[0] ?? "there";
   const router = useRouter();
+  const greeting = useTimeOfDayGreeting();
+  const todayLabel = useTodayLabel();
   const [preset, setPreset] = useState("Overview");
   const [activeWidgets, setActiveWidgets] = useState<string[]>(DEFAULT_WIDGETS);
   const [customizing, setCustomizing] = useState(false);
@@ -697,10 +728,10 @@ export function DashboardView({
               margin: "0 0 4px",
             }}
           >
-            Good {timeOfDayGreeting()}, {firstName} 👋
+            Good {greeting}, {firstName} 👋
           </h1>
           <p style={{ fontSize: 14, color: "var(--muted-foreground)", margin: 0 }}>
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })} · Here&apos;s your financial overview
+            {todayLabel} · Here&apos;s your financial overview
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>

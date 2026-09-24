@@ -20,19 +20,18 @@ export const authConfig = {
     /**
      * Route authorization. Runs on every matched request (Edge runtime).
      * Returns true to allow, false to trigger a redirect to `pages.signIn`.
+     *
+     * Signed-in users hitting /login or /register are bounced to /dashboard
+     * by a server-side check in those pages (avoids hydration warnings that
+     * middleware redirects can produce there).
      */
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = Boolean(auth?.user);
       const isProtected = PROTECTED_ROUTES.some(
         (route) => nextUrl.pathname === route || nextUrl.pathname.startsWith(`${route}/`),
       );
-      const isAuthPage = nextUrl.pathname === "/login" || nextUrl.pathname === "/register";
 
       if (isProtected) return isLoggedIn;
-      if (isAuthPage && isLoggedIn) {
-        // Already signed in — skip the auth forms.
-        return Response.redirect(new URL("/dashboard", nextUrl));
-      }
       return true;
     },
     jwt({ token, user }) {
