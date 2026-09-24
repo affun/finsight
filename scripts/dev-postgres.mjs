@@ -12,7 +12,9 @@ import { existsSync } from "node:fs";
 import EmbeddedPostgres from "embedded-postgres";
 
 const PORT = Number(process.env.PGPORT ?? 5432);
-const DB_NAME = "finsight";
+// Override with DB_NAME when several worktrees share one Postgres instance
+// (each checkout points its .env at its own database, e.g. finsight_1).
+const DB_NAME = process.env.DB_NAME ?? "finsight";
 const DATA_DIR = "./pgdata";
 
 const pg = new EmbeddedPostgres({
