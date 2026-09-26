@@ -85,7 +85,7 @@ export function GoalFields({
         <input id="goal-name" name="name" required maxLength={120} defaultValue={initial?.name} style={inputStyle} placeholder="e.g. Emergency Fund" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }} className="form-grid-2">
         <div>
           <label htmlFor="goal-target" style={labelStyle}>Target amount</label>
           <input id="goal-target" name="targetAmount" required inputMode="decimal" placeholder="0.00" defaultValue={initial?.targetAmount} style={inputStyle} />

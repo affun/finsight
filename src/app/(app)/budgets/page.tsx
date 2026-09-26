@@ -182,7 +182,7 @@ export default async function BudgetsPage() {
                     border: `1px solid ${over ? "#F43F5E30" : "var(--border)"}`,
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", rowGap: 8 }} className="budget-head">
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontSize: 22 }}>{CATEGORY_ICONS[b.categories[0]?.category ?? "Other"] ?? "📦"}</span>
                       <div>

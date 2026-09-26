@@ -346,6 +346,7 @@ export function TransactionsView({
                     borderBottom: "1px solid var(--border)",
                     background: "var(--secondary)",
                   }}
+                  className="txn-cat-head"
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, background: categoryColor(cat) }} />
@@ -373,6 +374,7 @@ export function TransactionsView({
                       padding: "12px 20px",
                       borderTop: i === 0 ? "none" : "1px solid var(--border)",
                     }}
+                    className="txn-row"
                   >
                     <div
                       style={{
@@ -392,9 +394,9 @@ export function TransactionsView({
                         <ArrowDownRight size={15} color="var(--negative)" />
                       )}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0 }} className="txn-info">
                       <div style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{t.merchant}</div>
-                      <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
+                      <div style={{ fontSize: 11, color: "var(--muted-foreground)" }} className="txn-sub">
                         {t.accountName} · {t.date}
                       </div>
                     </div>

@@ -72,7 +72,7 @@ export function AddAccountButton() {
                 ))}
               </select>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 18 }} className="form-grid-2">
               <div>
                 <label htmlFor="acc-balance" style={labelStyle}>Opening balance</label>
                 <input id="acc-balance" name="balance" inputMode="decimal" placeholder="0.00" style={inputStyle} />

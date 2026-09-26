@@ -98,7 +98,7 @@ export function BudgetFields({
         <input id="bud-name" name="name" required maxLength={80} defaultValue={initial?.name} style={inputStyle} placeholder="e.g. September Monthly" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }} className="form-grid-2">
         <div>
           <label htmlFor="bud-amount" style={labelStyle}>Total amount</label>
           <input id="bud-amount" name="amount" required inputMode="decimal" placeholder="0.00" defaultValue={initial?.amount} style={inputStyle} />
@@ -114,7 +114,7 @@ export function BudgetFields({
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }} className="form-grid-2">
         <div>
           <label htmlFor="bud-start" style={labelStyle}>Start date</label>
           <input id="bud-start" name="startDate" type="date" required defaultValue={initial?.startDate ?? firstOfMonth()} style={inputStyle} />

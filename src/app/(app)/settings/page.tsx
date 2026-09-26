@@ -64,6 +64,7 @@ function Row({
         padding: "14px 20px",
         borderBottom: isLast ? "none" : "1px solid var(--border)",
       }}
+      className="settings-row"
     >
       <div
         style={{
@@ -166,7 +167,7 @@ export default function SettingsPage() {
 
       {/* Profile */}
       <Section title="Profile">
-        <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "flex", gap: 16, alignItems: "center" }}>
+        <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }} className="settings-row">
           <div
             style={{
               width: 56,
@@ -220,6 +221,7 @@ export default function SettingsPage() {
               outline: "none",
               width: 180,
             }}
+            className="settings-input"
           />
         </Row>
         <Row icon={Globe} label="Email" desc={displayEmail} isLast>
@@ -238,6 +240,7 @@ export default function SettingsPage() {
               outline: "none",
               width: 200,
             }}
+            className="settings-input"
           />
         </Row>
       </Section>
