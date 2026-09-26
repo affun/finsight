@@ -121,7 +121,7 @@ export function TransactionFormFields({
         </select>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }} className="form-grid-2">
         <div>
           <label htmlFor="txn-type" style={labelStyle}>Type</label>
           <select id="txn-type" name="type" defaultValue={initial?.type ?? "EXPENSE"} style={inputStyle}>
@@ -148,7 +148,7 @@ export function TransactionFormFields({
         <input id="txn-merchant" name="merchant" required maxLength={120} defaultValue={initial?.merchant} style={inputStyle} placeholder="e.g. BigBasket" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }} className="form-grid-2">
         <div>
           <label htmlFor="txn-category" style={labelStyle}>Category</label>
           <select id="txn-category" name="category" defaultValue={initial?.category ?? "Food"} style={inputStyle}>

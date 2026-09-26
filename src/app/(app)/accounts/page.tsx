@@ -66,7 +66,7 @@ export default async function AccountsPage() {
       </div>
 
       {/* Summary row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }} className="responsive-grid-3">
         {[
           { label: "Total Assets", value: `₹${fmt(summary.totalAssets)}`, color: "var(--positive)" },
           { label: "Total Liabilities", value: `-₹${fmt(summary.totalLiabilities)}`, color: "var(--negative)" },
@@ -76,7 +76,7 @@ export default async function AccountsPage() {
             <div style={{ fontSize: 11, fontWeight: 600, color: "var(--muted-foreground)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>
               {s.label}
             </div>
-            <div style={{ fontFamily: "var(--font-heading)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", color: s.color }}>
+            <div style={{ fontFamily: "var(--font-heading)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", color: s.color }} className="stat-value">
               {s.value}
             </div>
           </div>

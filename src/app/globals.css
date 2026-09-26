@@ -80,7 +80,19 @@ body {
   border-radius: 4px;
 }
 
-/* Responsive grid helpers used by inline-styled pages */
+/* Responsive grid helpers used by inline-styled pages.
+   Tiered to match the sidebar breakpoints: the sidebar collapses below
+   lg (1024px), so content grids must also rebalance at that width —
+   otherwise 4-column grids squeeze into the full-width tablet viewport. */
+
+/* Tablet tier: sidebar is hidden below 1024px, so wide grids get roomy */
+@media (max-width: 1023px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Phone tier */
 @media (max-width: 768px) {
   .responsive-grid-4 {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -115,5 +127,92 @@ body {
   }
   .responsive-stats-4 {
     grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Landing nav: keep the logo icon, drop the wordmark so both buttons fit */
+  .nav-wordmark {
+    display: none !important;
+  }
+  /* Dashboard widgets that span 2 columns on desktop: at a single track an
+     explicit span 2 would create an implicit second column and blow the page
+     wide. Inline styles set the span, so !important is required here — this
+     tier is the only place it may apply. */
+  .widget-wide {
+    grid-column: 1 / -1 !important;
+  }
+  /* Preset segmented control wraps instead of forcing a wide page */
+  .preset-row {
+    flex-wrap: wrap !important;
+  }
+  .preset-row > button {
+    flex: 1 0 auto;
+  }
+}
+
+/* Settings rows: label + control sit side by side on desktop; on phones
+   fixed-width text inputs drop to their own wrapped, indented line
+   (small controls like toggles/buttons still fit beside the label). */
+@media (max-width: 640px) {
+  .settings-row {
+    flex-wrap: wrap !important;
+  }
+  .settings-input {
+    order: 3;
+    width: calc(100% - 48px) !important;
+    margin-left: 48px;
+    margin-top: 4px;
+  }
+}
+
+/* CRUD form grids: two columns on desktop, one column on phones —
+   1fr 1fr would leave ~170px per field on a 360px screen. */
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Transaction rows: icon + merchant + amount stay on one line; the amount
+   slides under the merchant and the row actions wrap beside it when the
+   viewport can no longer fit everything side by side. */
+@media (max-width: 640px) {
+  .txn-row {
+    flex-wrap: wrap !important;
+    row-gap: 6px;
+  }
+  .txn-info {
+    flex-basis: calc(100% - 62px) !important;
+  }
+  .txn-info + div {
+    order: 3;
+    margin-left: 48px;
+    flex: 1;
+    text-align: right;
+  }
+  .txn-cat-head > div:first-child {
+    min-width: 0;
+  }
+  .txn-cat-head > div:first-child > span:nth-of-type(2) {
+    display: none;
+  }
+}
+
+/* Budget card header: icon+name+amount left, badge+actions right — wraps
+   to a second line on phones instead of pushing the card wide. */
+@media (max-width: 640px) {
+  .budget-head {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Large currency figures: fixed px sizes overflow narrow phone columns.
+   The components set their desktop sizes inline, so the clamps need
+   !important — applied only below 769px so desktop is untouched. */
+@media (max-width: 768px) {
+  .stat-value {
+    font-size: clamp(19px, 6vw, 28px) !important;
+  }
+  .hero-value {
+    font-size: clamp(21px, 7.2vw, 40px) !important;
+    overflow-wrap: anywhere;
   }
 }

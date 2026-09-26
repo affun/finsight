@@ -99,6 +99,7 @@ export default function LandingPage() {
               letterSpacing: "-0.02em",
               color: "var(--foreground)",
             }}
+            className="nav-wordmark"
           >
             FinSight
           </span>
@@ -281,7 +282,7 @@ export default function LandingPage() {
               <span style={{ fontSize: 13, color: "#10B981", fontWeight: 600 }}>+$660 this month</span>
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }} className="responsive-grid-3">
             {[
               { label: "Income", value: "$12,720", color: "#10B981" },
               { label: "Expenses", value: "$6,334", color: "#F43F5E" },

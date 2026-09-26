@@ -105,6 +105,7 @@ function StatCard({
           color: color || "var(--foreground)",
           marginBottom: 6,
         }}
+        className="stat-value"
       >
         {value}
       </div>
@@ -298,7 +299,7 @@ export function DashboardView({
     switch (name) {
       case "Total Balance":
         return (
-          <div style={{ ...cardBase, gridColumn: "span 2", padding: "20px 22px" }}>
+          <div style={{ ...cardBase, gridColumn: "span 2", padding: "20px 22px" }} className="widget-wide">
             {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             <div
               style={{
@@ -321,6 +322,7 @@ export function DashboardView({
                 color: "var(--foreground)",
                 marginBottom: 6,
               }}
+              className="hero-value"
             >
               ₹{fmt(data.totalBalance)}
             </div>
@@ -369,7 +371,7 @@ export function DashboardView({
 
       case "Cash Flow":
         return (
-          <div style={{ ...cardBase, gridColumn: "span 2" }}>
+          <div style={{ ...cardBase, gridColumn: "span 2" }} className="widget-wide">
             {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header("Cash Flow", <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>Last 6 months</span>)}
             <ResponsiveContainer width="100%" height={180}>
@@ -482,7 +484,7 @@ export function DashboardView({
 
       case "Recent Transactions":
         return (
-          <div style={{ ...cardBase, gridColumn: "span 2" }}>
+          <div style={{ ...cardBase, gridColumn: "span 2" }} className="widget-wide">
             {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header(
               "Recent Transactions",
@@ -562,7 +564,7 @@ export function DashboardView({
 
       case "Financial Goals":
         return (
-          <div style={{ ...cardBase, gridColumn: "span 2" }}>
+          <div style={{ ...cardBase, gridColumn: "span 2" }} className="widget-wide">
             {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             {header(
               "Goals",
@@ -639,7 +641,7 @@ export function DashboardView({
 
       case "AI Insights":
         return (
-          <div style={{ ...cardBase, background: "linear-gradient(135deg, #6366F108, #8B5CF608)", gridColumn: "span 2" }}>
+          <div style={{ ...cardBase, background: "linear-gradient(135deg, #6366F108, #8B5CF608)", gridColumn: "span 2" }} className="widget-wide">
             {customizing && <WidgetRemoveButton onRemove={() => removeWidget(name)} widgetName={name} />}
             <div style={{ padding: "18px 20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
@@ -736,7 +738,7 @@ export function DashboardView({
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           {/* Presets */}
-          <div style={{ display: "flex", background: "var(--secondary)", borderRadius: 9, padding: 3, gap: 2 }}>
+          <div style={{ display: "flex", background: "var(--secondary)", borderRadius: 9, padding: 3, gap: 2 }} className="preset-row">
             {PRESETS.map((p) => (
               <button
                 key={p}
