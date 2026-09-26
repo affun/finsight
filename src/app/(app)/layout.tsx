@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import Sidebar from "@/components/layout/Sidebar";
 import { UserProvider } from "@/components/providers/UserProvider";
 import { getSessionUser } from "@/lib/session";
@@ -7,9 +9,14 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Middleware guarantees an authenticated session here; the null branch is
-  // a defensive fallback (e.g. a user row deleted while their JWT is alive).
   const user = await getSessionUser();
+
+  // Middleware only checks for a session *token*; if the user row behind it
+  // is gone (e.g. the database was re-seeded), heal the stale session here by
+  // sending the visitor to login instead of rendering a ghost identity.
+  if (!user) {
+    redirect("/login");
+  }
 
   return (
     <UserProvider user={user}>
